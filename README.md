@@ -6,6 +6,6 @@ Connect your Quest to your PC via a USB Cable. Then start "BMBF_Updater.exe" and
 - rui2015 (helped testing the tool and gived suggestions)
 - darkuni (helped me making the Playlist backuping and restoring possible. Check out his nice program: [Playlist Editor Pro](https://beatsaberquest.com/bmbf/my-tools/playlist-editor-pro/#:~:text=Playlist%20Editor%20Pro%20is%20a,details%20and%20download%20it%20here.))
 # Known Issues
-- Every mod that has a "|" in it's mod ID will crash the Mod Backup. (not fixable currently)
+- N/A
 # To-Do
 - N/A
