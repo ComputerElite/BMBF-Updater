@@ -1,4 +1,4 @@
-https://github.com/ComputerElite/BMBF-Updater/releases/download/1.0/BU.V.1.0.zip
+https://github.com/ComputerElite/BMBF-Updater/releases/download/1.0.1/BU.V.1.0.1.zip
 1
 0
-0
+1
