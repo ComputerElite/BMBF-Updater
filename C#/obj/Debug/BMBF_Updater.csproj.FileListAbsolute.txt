@@ -1,0 +1,15 @@
+D:\Visual Studio\BMBF_Updater\BMBF_Updater\obj\Debug\BMBF_Updater.csprojAssemblyReference.cache
+D:\Visual Studio\BMBF_Updater\BMBF_Updater\obj\Debug\MainWindow.g.cs
+D:\Visual Studio\BMBF_Updater\BMBF_Updater\obj\Debug\App.g.cs
+D:\Visual Studio\BMBF_Updater\BMBF_Updater\obj\Debug\BMBF_Updater_MarkupCompile.cache
+D:\Visual Studio\BMBF_Updater\BMBF_Updater\obj\Debug\BMBF_Updater_MarkupCompile.lref
+D:\Visual Studio\BMBF_Updater\BMBF_Updater\bin\Debug\BMBF_Updater.exe.config
+D:\Visual Studio\BMBF_Updater\BMBF_Updater\bin\Debug\BMBF_Updater.exe
+D:\Visual Studio\BMBF_Updater\BMBF_Updater\bin\Debug\BMBF_Updater.pdb
+D:\Visual Studio\BMBF_Updater\BMBF_Updater\obj\Debug\MainWindow.baml
+D:\Visual Studio\BMBF_Updater\BMBF_Updater\obj\Debug\BMBF_Updater.g.resources
+D:\Visual Studio\BMBF_Updater\BMBF_Updater\obj\Debug\BMBF_Updater.Properties.Resources.resources
+D:\Visual Studio\BMBF_Updater\BMBF_Updater\obj\Debug\BMBF_Updater.csproj.GenerateResource.cache
+D:\Visual Studio\BMBF_Updater\BMBF_Updater\obj\Debug\BMBF_Updater.csproj.CoreCompileInputs.cache
+D:\Visual Studio\BMBF_Updater\BMBF_Updater\obj\Debug\BMBF_Updater.exe
+D:\Visual Studio\BMBF_Updater\BMBF_Updater\obj\Debug\BMBF_Updater.pdb
