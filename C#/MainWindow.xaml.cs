@@ -29,7 +29,7 @@ namespace BMBF_Updater
 
         int MajorV = 1;
         int MinorV = 0;
-        int PatchV = 0;
+        int PatchV = 1;
         Boolean Preview = false;
 
         String exe = System.Reflection.Assembly.GetEntryAssembly().Location;
@@ -51,6 +51,10 @@ namespace BMBF_Updater
             {
                 Directory.CreateDirectory(exe + "\\tmp\\Backup");
             }
+            if (!Directory.Exists(exe + "\\Backup"))
+            {
+                Directory.CreateDirectory(exe + "\\Backup");
+            }
             if (File.Exists(exe + "\\BMBF_Update.exe"))
             {
                 File.Delete(exe + "\\BMBF_Update.exe");
@@ -64,15 +68,30 @@ namespace BMBF_Updater
         {
             using (WebClient client = new WebClient())
             {
-                client.DownloadFile("https://raw.githubusercontent.com/ComputerElite/BMBF-Updater/master/BMBF.txt", exe + "\\tmp\\BMBF.txt");
+                client.DownloadFile("https://bmbf.dev/stable/json", exe + "\\tmp\\BMBF.txt");
             }
             StreamReader VReader = new StreamReader(exe + "\\tmp\\BMBF.txt");
 
             String line;
-            
-            while ((line = VReader.ReadLine()) != null) {
-                BMBF = line;
+            String f = "";
+            while ((line = VReader.ReadLine()) != null)
+            {
+                f = f + line;
             }
+
+            var json = SimpleJSON.JSON.Parse(f);
+            String id = "";
+            String name;
+            for (int i = 0; i < 5; i++)
+            {
+                name = json[0]["assets"][i]["name"].ToString();
+                if (name == "\"com.weloveoculus.BMBF.apk\"")
+                {
+                    id = json[0]["assets"][i]["id"].ToString();
+                    return;
+                }
+            }
+            BMBF = "https://bmbf.dev/stable/" + id;
         }
 
 
@@ -144,7 +163,7 @@ namespace BMBF_Updater
             s.UseShellExecute = false;
             s.FileName = "adb.exe";
             s.WindowStyle = ProcessWindowStyle.Minimized;
-            s.Arguments = "pull /sdcard/Android/data/com.beatgames.beatsaber/files/ \"" + exe + "\\tmp\\Backup\"";
+            s.Arguments = "pull /sdcard/Android/data/com.beatgames.beatsaber/files/ \"" + exe + "\\Backup\"";
             try
             {
                 // Start the process with the info we specified.
@@ -153,8 +172,8 @@ namespace BMBF_Updater
                 {
                     exeProcess.WaitForExit();
                     txtbox.AppendText("\nBacked up Beat Saber Game Data.");
-                    Directory.Delete(exe + "\\tmp\\Backup\\files\\libs", true);
-                    Directory.Delete(exe + "\\tmp\\Backup\\files\\mods", true);
+                    Directory.Delete(exe + "\\Backup\\files\\libs", true);
+                    Directory.Delete(exe + "\\Backup\\files\\mods", true);
                     txtbox.ScrollToEnd();
                     Application.Current.Dispatcher.Invoke(DispatcherPriority.Background, new Action(delegate { }));
                 }
@@ -168,7 +187,7 @@ namespace BMBF_Updater
                 se.UseShellExecute = false;
                 se.FileName = User + "\\AppData\\Roaming\\SideQuest\\platform-tools\\adb.exe";
                 se.WindowStyle = ProcessWindowStyle.Minimized;
-                se.Arguments = "pull /sdcard/Android/data/com.beatgames.beatsaber/files/ \"" + exe + "\\tmp\\Backup\"";
+                se.Arguments = "pull /sdcard/Android/data/com.beatgames.beatsaber/files/ \"" + exe + "\\Backup\"";
                 try
                 {
                     // Start the process with the info we specified.
@@ -177,8 +196,8 @@ namespace BMBF_Updater
                     {
                         exeProcess.WaitForExit();
                         txtbox.AppendText("\nBacked up Beat Saber Game Data.");
-                        Directory.Delete(exe + "\\tmp\\Backup\\files\\libs", true);
-                        Directory.Delete(exe + "\\tmp\\Backup\\files\\mods", true);
+                        Directory.Delete(exe + "\\Backup\\files\\libs", true);
+                        Directory.Delete(exe + "\\Backup\\files\\mods", true);
                         txtbox.ScrollToEnd();
                         Application.Current.Dispatcher.Invoke(DispatcherPriority.Background, new Action(delegate { }));
 
@@ -187,7 +206,7 @@ namespace BMBF_Updater
                 catch
                 {
                     // Log error.
-                    txtbox.AppendText("\n\n\nAn Error Occured. Check following");
+                    txtbox.AppendText("\n\n\nAn Error Occured (Code: ADB100). Check following");
                     txtbox.AppendText("\n\n- Your Quest is connected and USB Debugging enabled.");
                     txtbox.AppendText("\n\n- You have adb installed.");
                 }
@@ -248,7 +267,7 @@ namespace BMBF_Updater
                 catch
                 {
                     // Log error.
-                    txtbox.AppendText("\n\n\nAn Error Occured. Check following");
+                    txtbox.AppendText("\n\n\nAn Error Occured (Code: ADB100). Check following");
                     txtbox.AppendText("\n\n- Your Quest is connected and USB Debugging enabled.");
                     txtbox.AppendText("\n\n- You have adb installed.");
                 }
@@ -306,7 +325,7 @@ namespace BMBF_Updater
                 catch
                 {
                     // Log error.
-                    txtbox.AppendText("\n\n\nAn Error Occured. Check following");
+                    txtbox.AppendText("\n\n\nAn Error Occured (Code: ADB100). Check following");
                     txtbox.AppendText("\n\n- Your Quest is connected and USB Debugging enabled.");
                     txtbox.AppendText("\n\n- You have adb installed.");
                 }
@@ -392,7 +411,7 @@ namespace BMBF_Updater
                 catch
                 {
                     // Log error.
-                    txtbox.AppendText("\n\n\nAn Error Occured. Check following");
+                    txtbox.AppendText("\n\n\nAn Error Occured (Code: ADB100). Check following");
                     txtbox.AppendText("\n\n- Your Quest is connected and USB Debugging enabled.");
                     txtbox.AppendText("\n\n- You have adb installed.");
                 }
@@ -437,7 +456,7 @@ namespace BMBF_Updater
                 {
                     int Index = line.IndexOf("\"Mods\":[{", 0, line.Length);
                     String Playlists = line.Substring(0, Index);
-                    File.WriteAllText(exe + "\\tmp\\Playlist.json", Playlists);
+                    File.WriteAllText(exe + "\\Backup\\Playlist.json", Playlists);
                 }
                 txtbox.AppendText("\n\nBacked up Playlists to " + exe + "\\Playlist.json");
                 txtbox.ScrollToEnd();
@@ -445,7 +464,7 @@ namespace BMBF_Updater
             }
             catch
             {
-                txtbox.AppendText("\n\n\nAn error occured. Check following:");
+                txtbox.AppendText("\n\n\nAn error occured (Code: BMBF100). Check following:");
                 txtbox.AppendText("\n\n- You put in the Quests IP right.");
                 txtbox.AppendText("\n\n- Your Quest is on.");
 
@@ -487,7 +506,7 @@ namespace BMBF_Updater
 
                 String Config = exe + "\\tmp\\OConfig.json";
 
-                Playlists = exe + "\\tmp\\Playlist.json";
+                Playlists = exe + "\\Backup\\Playlist.json";
 
                 txtbox.AppendText("\n\n" + Playlists);
 
@@ -530,7 +549,7 @@ namespace BMBF_Updater
             }
             catch
             {
-                txtbox.AppendText("\n\n\nAn error occured. Check following:");
+                txtbox.AppendText("\n\n\nAn error occured (Code: BMBF100). Check following:");
                 txtbox.AppendText("\n\n- Your Quest is on and BMBF opened");
             }
 
@@ -547,7 +566,7 @@ namespace BMBF_Updater
             Ms.UseShellExecute = false;
             Ms.FileName = "adb.exe";
             Ms.WindowStyle = ProcessWindowStyle.Minimized;
-            Ms.Arguments = "push \"" + exe + "\\tmp\\Backup\\files\" /sdcard/Android/data/com.beatgames.beatsaber";
+            Ms.Arguments = "push \"" + exe + "\\Backup\\files\" /sdcard/Android/data/com.beatgames.beatsaber";
             try
             {
                 // Start the process with the info we specified.
@@ -569,7 +588,7 @@ namespace BMBF_Updater
                 Mse.UseShellExecute = false;
                 Mse.FileName = User + "\\AppData\\Roaming\\SideQuest\\platform-tools\\adb.exe";
                 Mse.WindowStyle = ProcessWindowStyle.Minimized;
-                Mse.Arguments = "push \"" + exe + "\\tmp\\Backup\\files\" /sdcard/Android/data/com.beatgames.beatsaber";
+                Mse.Arguments = "push \"" + exe + "\\Backup\\files\" /sdcard/Android/data/com.beatgames.beatsaber";
                 try
                 {
                     // Start the process with the info we specified.
@@ -586,7 +605,7 @@ namespace BMBF_Updater
                 catch
                 {
                     // Log error.
-                    txtbox.AppendText("\n\n\nAn Error Occured. Check following");
+                    txtbox.AppendText("\n\n\nAn Error Occured (Code: ADB100). Check following");
                     txtbox.AppendText("\n\n- Your Quest is connected and USB Debugging enabled.");
                     txtbox.AppendText("\n\n- You have adb installed.");
                 }
@@ -633,7 +652,15 @@ namespace BMBF_Updater
                 //Download Update.txt
                 using (WebClient client = new WebClient())
                 {
-                    client.DownloadFile("https://raw.githubusercontent.com/ComputerElite/BMBF-Updater/master/Update.txt", exe + "\\tmp\\Update.txt");
+                    try
+                    {
+                        client.DownloadFile("https://raw.githubusercontent.com/ComputerElite/BMBF-Updater/master/Update.txt", exe + "\\tmp\\Update.txt");
+
+                    }
+                    catch
+                    {
+                        txtbox.AppendText("\n\n\nAn error Occured (Code: UD100).");
+                    }
                 }
                 StreamReader VReader = new StreamReader(exe + "\\tmp\\Update.txt");
 
@@ -725,7 +752,7 @@ namespace BMBF_Updater
             catch
             {
                 // Log error.
-                txtbox.AppendText("\nAn Error Occured");
+                txtbox.AppendText("\nAn Error Occured (Code: UD200)");
             }
         }
 
