@@ -29,7 +29,7 @@ namespace BMBF_Updater
 
         int MajorV = 1;
         int MinorV = 0;
-        int PatchV = 1;
+        int PatchV = 2;
         Boolean Preview = false;
 
         String exe = System.Reflection.Assembly.GetEntryAssembly().Location;
@@ -61,6 +61,7 @@ namespace BMBF_Updater
             }
             Update();
             BMBF_Link();
+            QuestIP();
 
         }
 
@@ -88,7 +89,7 @@ namespace BMBF_Updater
                 if (name == "\"com.weloveoculus.BMBF.apk\"")
                 {
                     id = json[0]["assets"][i]["id"].ToString();
-                    return;
+                    break;
                 }
             }
             BMBF = "https://bmbf.dev/stable/" + id;
@@ -135,10 +136,58 @@ namespace BMBF_Updater
             this.Close();
         }
 
+        public void adb(String Argument)
+        {
+            String User = System.Environment.GetEnvironmentVariable("USERPROFILE");
+            ProcessStartInfo s = new ProcessStartInfo();
+            s.CreateNoWindow = false;
+            s.UseShellExecute = false;
+            s.FileName = "adb.exe";
+            s.WindowStyle = ProcessWindowStyle.Minimized;
+            s.Arguments = Argument;
+            try
+            {
+                // Start the process with the info we specified.
+                // Call WaitForExit and then the using statement will close.
+                using (Process exeProcess = Process.Start(s))
+                {
+                    exeProcess.WaitForExit();
+                }
+            }
+            catch
+            {
+
+                ProcessStartInfo se = new ProcessStartInfo();
+                se.CreateNoWindow = false;
+                se.UseShellExecute = false;
+                se.FileName = User + "\\AppData\\Roaming\\SideQuest\\platform-tools\\adb.exe";
+                se.WindowStyle = ProcessWindowStyle.Minimized;
+                se.Arguments = Argument;
+                try
+                {
+                    // Start the process with the info we specified.
+                    // Call WaitForExit and then the using statement will close.
+                    using (Process exeProcess = Process.Start(se))
+                    {
+                        exeProcess.WaitForExit();
+                    }
+                }
+                catch
+                {
+                    // Log error.
+                    txtbox.AppendText("\n\n\nAn error Occured (Code: ADB100). Check following");
+                    txtbox.AppendText("\n\n- Your Quest is connected and USB Debugging enabled.");
+                    txtbox.AppendText("\n\n- You have adb installed.");
+                }
+
+            }
+        }
+
 
         private void Uninstall(object sender, RoutedEventArgs e)
         {
-            if(running)
+            getQuestIP();
+            if (running)
             {
                 return;
             }
@@ -150,70 +199,9 @@ namespace BMBF_Updater
             Application.Current.Dispatcher.Invoke(DispatcherPriority.Background, new Action(delegate { }));
 
             //Back Up BS game Data
-            if (Directory.Exists(User + "\\AppData\\Roaming\\SideQuest\\backups\\com.beatgames.beatsaber\\data\\Backup"))
-            {
-                Directory.Delete(User + "\\AppData\\Roaming\\SideQuest\\backups\\com.beatgames.beatsaber\\data\\Backup", true);
-            }
-            if (!Directory.Exists(User + "\\AppData\\Roaming\\SideQuest\\backups\\com.beatgames.beatsaber\\data\\Backup"))
-            {
-                Directory.CreateDirectory(User + "\\AppData\\Roaming\\SideQuest\\backups\\com.beatgames.beatsaber\\data\\Backup");
-            }
-            ProcessStartInfo s = new ProcessStartInfo();
-            s.CreateNoWindow = false;
-            s.UseShellExecute = false;
-            s.FileName = "adb.exe";
-            s.WindowStyle = ProcessWindowStyle.Minimized;
-            s.Arguments = "pull /sdcard/Android/data/com.beatgames.beatsaber/files/ \"" + exe + "\\Backup\"";
-            try
-            {
-                // Start the process with the info we specified.
-                // Call WaitForExit and then the using statement will close.
-                using (Process exeProcess = Process.Start(s))
-                {
-                    exeProcess.WaitForExit();
-                    txtbox.AppendText("\nBacked up Beat Saber Game Data.");
-                    Directory.Delete(exe + "\\Backup\\files\\libs", true);
-                    Directory.Delete(exe + "\\Backup\\files\\mods", true);
-                    txtbox.ScrollToEnd();
-                    Application.Current.Dispatcher.Invoke(DispatcherPriority.Background, new Action(delegate { }));
-                }
-            }
-            catch
-            {
 
-                
-                ProcessStartInfo se = new ProcessStartInfo();
-                se.CreateNoWindow = false;
-                se.UseShellExecute = false;
-                se.FileName = User + "\\AppData\\Roaming\\SideQuest\\platform-tools\\adb.exe";
-                se.WindowStyle = ProcessWindowStyle.Minimized;
-                se.Arguments = "pull /sdcard/Android/data/com.beatgames.beatsaber/files/ \"" + exe + "\\Backup\"";
-                try
-                {
-                    // Start the process with the info we specified.
-                    // Call WaitForExit and then the using statement will close.
-                    using (Process exeProcess = Process.Start(se))
-                    {
-                        exeProcess.WaitForExit();
-                        txtbox.AppendText("\nBacked up Beat Saber Game Data.");
-                        Directory.Delete(exe + "\\Backup\\files\\libs", true);
-                        Directory.Delete(exe + "\\Backup\\files\\mods", true);
-                        txtbox.ScrollToEnd();
-                        Application.Current.Dispatcher.Invoke(DispatcherPriority.Background, new Action(delegate { }));
 
-                    }
-                }
-                catch
-                {
-                    // Log error.
-                    txtbox.AppendText("\n\n\nAn Error Occured (Code: ADB100). Check following");
-                    txtbox.AppendText("\n\n- Your Quest is connected and USB Debugging enabled.");
-                    txtbox.AppendText("\n\n- You have adb installed.");
-                }
-
-            }
-            
-
+            adb("pull /sdcard/Android/data/com.beatgames.beatsaber/files/ \"" + exe + "\\Backup\"");
 
 
 
@@ -223,56 +211,7 @@ namespace BMBF_Updater
             Application.Current.Dispatcher.Invoke(DispatcherPriority.Background, new Action(delegate { }));
 
             //Back Up BS game Data
-            ProcessStartInfo Bs = new ProcessStartInfo();
-            s.CreateNoWindow = false;
-            s.UseShellExecute = false;
-            s.FileName = "adb.exe";
-            s.WindowStyle = ProcessWindowStyle.Minimized;
-            s.Arguments = "uninstall com.beatgames.beatsaber";
-            try
-            {
-                // Start the process with the info we specified.
-                // Call WaitForExit and then the using statement will close.
-                using (Process exeProcess = Process.Start(s))
-                {
-                    exeProcess.WaitForExit();
-                    txtbox.AppendText("\nUninstalled Beat Saber");
-                    txtbox.ScrollToEnd();
-                    Application.Current.Dispatcher.Invoke(DispatcherPriority.Background, new Action(delegate { }));
-                }
-            }
-            catch
-            {
-
-
-                ProcessStartInfo Bse = new ProcessStartInfo();
-                Bse.CreateNoWindow = false;
-                Bse.UseShellExecute = false;
-                Bse.FileName = User + "\\AppData\\Roaming\\SideQuest\\platform-tools\\adb.exe";
-                Bse.WindowStyle = ProcessWindowStyle.Minimized;
-                Bse.Arguments = "uninstall com.beatgames.beatsaber";
-                try
-                {
-                    // Start the process with the info we specified.
-                    // Call WaitForExit and then the using statement will close.
-                    using (Process exeProcess = Process.Start(Bse))
-                    {
-                        exeProcess.WaitForExit();
-                        txtbox.AppendText("\nUninstalled Beat Saber");
-                        txtbox.ScrollToEnd();
-                        Application.Current.Dispatcher.Invoke(DispatcherPriority.Background, new Action(delegate { }));
-
-                    }
-                }
-                catch
-                {
-                    // Log error.
-                    txtbox.AppendText("\n\n\nAn Error Occured (Code: ADB100). Check following");
-                    txtbox.AppendText("\n\n- Your Quest is connected and USB Debugging enabled.");
-                    txtbox.AppendText("\n\n- You have adb installed.");
-                }
-
-            }
+            adb("uninstall com.beatgames.beatsaber");
 
 
             //Uninstall BMBF
@@ -281,56 +220,7 @@ namespace BMBF_Updater
             Application.Current.Dispatcher.Invoke(DispatcherPriority.Background, new Action(delegate { }));
 
 
-            ProcessStartInfo Ms = new ProcessStartInfo();
-            Ms.CreateNoWindow = false;
-            Ms.UseShellExecute = false;
-            Ms.FileName = "adb.exe";
-            Ms.WindowStyle = ProcessWindowStyle.Minimized;
-            Ms.Arguments = "uninstall com.weloveoculus.BMBF";
-            try
-            {
-                // Start the process with the info we specified.
-                // Call WaitForExit and then the using statement will close.
-                using (Process exeProcess = Process.Start(Ms))
-                {
-                    exeProcess.WaitForExit();
-                    txtbox.AppendText("\nUninstalled BMBF");
-                    txtbox.ScrollToEnd();
-                    Application.Current.Dispatcher.Invoke(DispatcherPriority.Background, new Action(delegate { }));
-                }
-            }
-            catch
-            {
-
-
-                ProcessStartInfo Mse = new ProcessStartInfo();
-                Mse.CreateNoWindow = false;
-                Mse.UseShellExecute = false;
-                Mse.FileName = User + "\\AppData\\Roaming\\SideQuest\\platform-tools\\adb.exe";
-                Mse.WindowStyle = ProcessWindowStyle.Minimized;
-                Mse.Arguments = "uninstall com.weloveoculus.BMBF";
-                try
-                {
-                    // Start the process with the info we specified.
-                    // Call WaitForExit and then the using statement will close.
-                    using (Process exeProcess = Process.Start(Mse))
-                    {
-                        exeProcess.WaitForExit();
-                        txtbox.AppendText("\nUninstalled BMBF");
-                        txtbox.ScrollToEnd();
-                        Application.Current.Dispatcher.Invoke(DispatcherPriority.Background, new Action(delegate { }));
-
-                    }
-                }
-                catch
-                {
-                    // Log error.
-                    txtbox.AppendText("\n\n\nAn Error Occured (Code: ADB100). Check following");
-                    txtbox.AppendText("\n\n- Your Quest is connected and USB Debugging enabled.");
-                    txtbox.AppendText("\n\n- You have adb installed.");
-                }
-
-            }
+            adb("uninstall com.weloveoculus.BMBF");
             
 
             txtbox.AppendText("\n\n\nnow download Beat Saber in the library of your Quest AND start it once. Then click \"Install BMBF\"");
@@ -339,10 +229,87 @@ namespace BMBF_Updater
             running = false;
         }
 
+        public String adbS(String Argument)
+        {
+            String User = System.Environment.GetEnvironmentVariable("USERPROFILE");
+            ProcessStartInfo s = new ProcessStartInfo();
+            s.CreateNoWindow = false;
+            s.UseShellExecute = false;
+            s.FileName = "adb.exe";
+            s.WindowStyle = ProcessWindowStyle.Minimized;
+            s.RedirectStandardOutput = true;
+            s.Arguments = Argument;
+            try
+            {
+                // Start the process with the info we specified.
+                // Call WaitForExit and then the using statement will close.
+                using (Process exeProcess = Process.Start(s))
+                {
+                    String IPS = exeProcess.StandardOutput.ReadToEnd();
+                    exeProcess.WaitForExit();
+                    return IPS;
+                }
+            }
+            catch
+            {
 
+                ProcessStartInfo se = new ProcessStartInfo();
+                se.CreateNoWindow = false;
+                se.UseShellExecute = false;
+                se.FileName = User + "\\AppData\\Roaming\\SideQuest\\platform-tools\\adb.exe";
+                se.WindowStyle = ProcessWindowStyle.Minimized;
+                se.RedirectStandardOutput = true;
+                se.Arguments = Argument;
+                try
+                {
+                    // Start the process with the info we specified.
+                    // Call WaitForExit and then the using statement will close.
+                    using (Process exeProcess = Process.Start(se))
+                    {
+                        String IPS = exeProcess.StandardOutput.ReadToEnd();
+                        exeProcess.WaitForExit();
+                        return IPS;
+
+                    }
+                }
+                catch
+                {
+                    // Log error.
+                    txtbox.AppendText("\n\n\nAn error Occured (Code: ADB100). Check following");
+                    txtbox.AppendText("\n\n- Your Quest is connected and USB Debugging enabled.");
+                    txtbox.AppendText("\n\n- You have adb installed.");
+                }
+            }
+            return "";
+        }
+
+        public void QuestIP()
+        {
+            String IPS = adbS("shell ifconfig wlan0");
+            int Index = IPS.IndexOf("inet addr:");
+            Boolean space = false;
+            String FIP = "";
+            for (int i = 0; i < IPS.Length; i++)
+            {
+                if (i > (Index + 9) && i < (Index + 9 + 16))
+                {
+                    if (IPS.Substring(i, 1) == " ")
+                    {
+                        space = true;
+                    }
+                    if (!space)
+                    {
+                        FIP = FIP + IPS.Substring(i, 1);
+                    }
+                }
+            }
+            IP = FIP;
+            Quest.Text = FIP;
+        }
 
         private void Install(object sender, RoutedEventArgs e)
         {
+            getQuestIP();
             if(running)
             {
                 return;
@@ -352,9 +319,9 @@ namespace BMBF_Updater
             txtbox.ScrollToEnd();
             Application.Current.Dispatcher.Invoke(DispatcherPriority.Background, new Action(delegate { }));
 
-            using (WebClient client = new WebClient())
+            using (TimeoutWebClient client2 = new TimeoutWebClient())
             {
-                client.DownloadFile(BMBF, exe + "\\tmp\\BMBF.apk");
+               client2.DownloadFile(BMBF, exe + "\\tmp\\BMBF.apk");
             }
             txtbox.AppendText("\nDownload Complete");
             txtbox.ScrollToEnd();
@@ -367,57 +334,36 @@ namespace BMBF_Updater
             Application.Current.Dispatcher.Invoke(DispatcherPriority.Background, new Action(delegate { }));
 
 
-            ProcessStartInfo Ms = new ProcessStartInfo();
-            Ms.CreateNoWindow = false;
-            Ms.UseShellExecute = false;
-            Ms.FileName = "adb.exe";
-            Ms.WindowStyle = ProcessWindowStyle.Minimized;
-            Ms.Arguments = "install \"" + exe + "\\tmp\\BMBF.apk\"";
-            try
-            {
-                // Start the process with the info we specified.
-                // Call WaitForExit and then the using statement will close.
-                using (Process exeProcess = Process.Start(Ms))
-                {
-                    exeProcess.WaitForExit();
-                    txtbox.AppendText("\nInstalled BMBF");
-                    txtbox.ScrollToEnd();
-                    Application.Current.Dispatcher.Invoke(DispatcherPriority.Background, new Action(delegate { }));
-                }
-            }
-            catch
-            {
+            adb("install -r \"" + exe + "\\tmp\\BMBF.apk\"");
+
+            //Mod Beat Saber
+            txtbox.AppendText("\n\nModding Beat Saber. Please wait...");
+            txtbox.ScrollToEnd();
+            Application.Current.Dispatcher.Invoke(DispatcherPriority.Background, new Action(delegate { }));
 
 
-                ProcessStartInfo Mse = new ProcessStartInfo();
-                Mse.CreateNoWindow = false;
-                Mse.UseShellExecute = false;
-                Mse.FileName = User + "\\AppData\\Roaming\\SideQuest\\platform-tools\\adb.exe";
-                Mse.WindowStyle = ProcessWindowStyle.Minimized;
-                Mse.Arguments = "install \"" + exe + "\\tmp\\BMBF.apk\"";
-                try
-                {
-                    // Start the process with the info we specified.
-                    // Call WaitForExit and then the using statement will close.
-                    using (Process exeProcess = Process.Start(Mse))
-                    {
-                        exeProcess.WaitForExit();
-                        txtbox.AppendText("\nInstalled BMBF");
-                        txtbox.ScrollToEnd();
-                        Application.Current.Dispatcher.Invoke(DispatcherPriority.Background, new Action(delegate { }));
+            adb("shell am start -n com.weloveoculus.BMBF/com.weloveoculus.BMBF.MainActivity"); //Start BMBF
+            adb("shell pm grant com.weloveoculus.BMBF android.permission.READ_EXTERNAL_STORAGE"); //Grant permission read
+            adb("shell pm grant com.weloveoculus.BMBF android.permission.WRITE_EXTERNAL_STORAGE"); //Grant permission write
+            // Need to add a delay
+            System.Threading.Thread.Sleep(6000);
+            adb("shell am start -n com.weloveoculus.BMBF/com.weloveoculus.BMBF.MainActivity"); //Start BMBF
+            System.Threading.Thread.Sleep(5000);
+            adb("shell am start -n com.weloveoculus.BMBF/com.weloveoculus.BMBF.MainActivity"); //Start BMBF
+            System.Threading.Thread.Sleep(5000);
+            TimeoutWebClient client = new TimeoutWebClient();
+            client.UploadData("http://" + IP + ":50000/host/mod/install/step1", "POST", new byte[0]);
+            adb("uninstall com.beatgames.beatsaber");
+            client.UploadData("http://" + IP + ":50000/host/mod/install/step2", "POST", new byte[0]);
+            adb("pull /sdcard/Android/data/com.weloveoculus.BMBF/cache/beatsabermod.apk \"" + exe + "\\tmp\\beatsabermod.apk\"");
+            adb("install -r \"" + exe + "\\tmp\\beatsabermod.apk\"");
+            client.UploadData("http://" + IP + ":50000/host/mod/install/step3", "POST", new byte[0]);
+            adb("shell am force-stop com.weloveoculus.BMBF");
+            adb("shell am start -n com.weloveoculus.BMBF/com.weloveoculus.BMBF.MainActivity"); //Start BMBF
+            adb("shell pm grant com.beatgames.beatsaber android.permission.READ_EXTERNAL_STORAGE"); //Grant permission read
+            adb("shell pm grant com.beatgames.beatsaber android.permission.WRITE_EXTERNAL_STORAGE"); //Grant permission write
 
-                    }
-                }
-                catch
-                {
-                    // Log error.
-                    txtbox.AppendText("\n\n\nAn Error Occured (Code: ADB100). Check following");
-                    txtbox.AppendText("\n\n- Your Quest is connected and USB Debugging enabled.");
-                    txtbox.AppendText("\n\n- You have adb installed.");
-                }
-
-            }
-            txtbox.AppendText("\n\n\nFinished Installing BMBF. Please continue modding in the headset. Start BMBF from unknown sources. After you finished click \"Reload Songs Folder\". After that start Beat Saber, Fail a Song and click \"Restore Playlists\" to restore your playlists and Scores.");
+            txtbox.AppendText("\n\n\nFinished Installing BMBF and modding Beat Saber. After you finished click \"Reload Songs Folder\" in BMBF. After that start Beat Saber, Fail a Song and click \"Restore Playlists\" to restore your playlists and Scores.");
             txtbox.ScrollToEnd();
             running = false;
         }
