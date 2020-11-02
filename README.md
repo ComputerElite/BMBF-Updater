@@ -1,3 +1,5 @@
+# THIS TOOL DOES NOT RECIEVE UPDATES ATM PLEASE USE [BMBF MANAGER](https://github.com/ComputerElite/BM) instead
+
 # BMBF-Updater
 A little tool do do almost completly automatic BMBF Updating.
 # How-to
